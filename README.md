@@ -13,18 +13,16 @@ To increase the unit test code coverage "percentage" with minimum effort, especi
 of value objects, such as Entity classes, JSON representations etc.
 
 ## Isn't that completely pointless?
-Yes, in that it will add no value to your test suite, and may give you a false sense of security.
+Yes, it will add no value to your test suite, and may give you a false sense of security.
 
 The target use case, though, is in when developing software in large [enterprises](https://github.com/EnterpriseQualityCoding/FizzBuzzEnterpriseEdition).
 
-<div style="margin: 1em 1em; padding: 0.5em 1em; border: 1px solid grey; ">
-Manager: We need to make sure that every class has at least 75% code coverage.
-
-_You: Even our value objects? They are nothing but a bunch of getters and setters._
-
-Manager: Well, I can _try_ to get an exception, but I think the Big Bosses are rather fond of the idea.
-
-_You: Oh, I see. I'll start writing some useless tests, then._
-</div>
+>Manager: We need to make sure that every class has at least 75% code coverage.
+>
+>_You: Even our value objects? They are nothing but a bunch of getters and setters._
+>
+>Manager: Well, I can _try_ to get an exception, but I think the Big Bosses are rather fond of the idea.
+>
+>_You: Oh, I see. I'll start writing some useless tests, then._
 
 This package helps you minimize the amount of time you spend writing useless tests.
