@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BuildGeneratorTest {
 
@@ -50,6 +52,11 @@ public class BuildGeneratorTest {
         assertCode("\"Hello\"", "Hello");
     }
 
+    @Test
+    void testQuoted() {
+        assertCode("\"Hello, \\\"World\\\"\"", "Hello, \"World\"");
+    }
+
     @Builder
     @Getter
     static class B1 {
@@ -80,10 +87,10 @@ public class BuildGeneratorTest {
     }
 
     @Test
-    void testUnsupported() {
+    void testInstant() {
         assertCode(
                 """
-                        /* TODO: class java.time.Instant-2023-09-17T15:25:09Z */
+                        java.time.Instant.parse("2023-09-17T15:25:09Z")
                         """,
                 Instant.ofEpochMilli(1694964309000L)
         );
@@ -96,6 +103,19 @@ public class BuildGeneratorTest {
                         List.of(1, true, 'C')
                         """,
                 List.of(1, Boolean.TRUE, 'C')
+        );
+    }
+
+    @Test
+    void testMap() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("K1", "V1");
+        map.put("K2", "V2");
+        assertCode(
+                """
+                        Map.of("K1","V1","K2","V2")
+                        """,
+                map
         );
     }
 }

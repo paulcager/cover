@@ -1,5 +1,7 @@
 package org.paulcager.cover;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.time.temporal.Temporal;
@@ -75,8 +77,7 @@ public class BuildGenerator {
     }
 
     private void generateCharSequence(PrintWriter w, CharSequence o, Class<?> cls) {
-        // TODO - I'm too lazy to escape the string
-        w.append('"').append(o).append('"');
+        w.append('"').append(StringEscapeUtils.escapeJava(o.toString())).append('"');
     }
 
     private void generateValue(PrintWriter w, Object o, Class<?> cls) {
