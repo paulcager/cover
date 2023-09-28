@@ -2,7 +2,10 @@ package org.paulcager.cover;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.time.temporal.Temporal;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -24,6 +27,7 @@ public class BuildGenerator {
         w.flush();
     }
 
+    @SuppressWarnings("unchecked")
     private void generate(PrintWriter w, Object o) throws ReflectiveOperationException {
         if (o == null) {
             w.print("null");
@@ -51,8 +55,14 @@ public class BuildGenerator {
         else if (builder != null) {
             generateBuilderCalls(w, o, builder, cls);
         }
+        else if (Temporal.class.isAssignableFrom(cls)) {
+            generateTemporal(w, (Temporal)o, cls);
+        }
         else if (Iterable.class.isAssignableFrom(cls)) {
-            generateIterable(w, (List) o, cls);
+            generateIterable(w, (List<Object>) o, cls);
+        }
+        else if (Map.class.isAssignableFrom(cls)) {
+            generateMap(w, (Map<Object, Object>) o, cls);
         }
         else {
             generateValue(w, o, cls);
@@ -96,6 +106,24 @@ public class BuildGenerator {
         w.print(")");
     }
 
+    private void generateMap(PrintWriter w, Map<Object, Object> m, Class<?> cls) throws ReflectiveOperationException {
+        w.print("Map.of(");
+
+        Iterator<Map.Entry<Object, Object>> it = m.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Object, Object> next = it.next();
+            generate(w, next.getKey());
+            w.print(", ");
+            generate(w, next.getValue());
+
+            if (it.hasNext()) {
+                w.print(", ");
+            }
+        }
+
+        w.print(")");
+    }
+
     private void generatePrimitive(PrintWriter w, Object o, Class<?> cls) {
         if (o instanceof Character) {
             w.append('\'').append((Character) o).append('\'');
@@ -103,6 +131,10 @@ public class BuildGenerator {
         else {
             w.append(o.toString());
         }
+    }
+
+    private void generateTemporal(PrintWriter w, Temporal o, Class<?> cls) {
+        w.print(cls.getName() + ".parse(\"" + o.toString() + "\")");
     }
 
     private void generateBuilderCalls(PrintWriter w, Object o, Method builder, Class<?> cls) throws ReflectiveOperationException {
@@ -129,7 +161,7 @@ public class BuildGenerator {
             return;
         }
 
-        Method getter = getMethod(o.getClass(), builderMethod.getName());
+        Method getter = getGetter(o.getClass(), builderMethod.getName());
         if (getter == null) {
             w.println("/* TODO - no getter " + builderMethod.getName() + " */");
             return;
@@ -146,13 +178,26 @@ public class BuildGenerator {
             return cls.getMethod(name);
         }
         catch (NoSuchMethodException e) {
-            try {
-                return cls.getMethod("get" + Character.toUpperCase(name.charAt(0)) + name.substring(1));
-            }
-            catch (NoSuchMethodException ex) {
-                return null;
-            }
+            return null;
         }
+    }
+
+    private Method getGetter(Class<?> cls, String name) {
+        Method m = getMethod(cls,name);
+        if (m != null) {
+            return m;
+        }
+
+        String camelCase = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+
+        m = getMethod(cls, "get" + camelCase);
+        if (m != null) {
+            return m;
+        }
+
+        m = getMethod(cls, "is" + camelCase);
+
+        return m;
     }
 }
 
